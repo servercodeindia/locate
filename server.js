@@ -48,6 +48,17 @@ app.get("/store", (req, res) => {
     });
 });
 
+// Endpoint to view saved locations
+app.get("/server", (req, res) => {
+    const filePath = path.join(__dirname, "location.txt");
+    // Check if the file exists before sending to avoid errors if no location is logged yet
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send("No location data recorded yet.");
+    }
+});
+
 app.listen(PORT, () => {
     console.log("================================================");
     console.log("  🌍 Geolocate Server Running!");

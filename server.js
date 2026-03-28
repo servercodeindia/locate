@@ -8,6 +8,11 @@ const PORT = process.env.PORT || 3000;
 // Serve static files (locate.html, etc.) from the current directory
 app.use(express.static(path.join(__dirname)));
 
+// Serve locate.html at the root URL to prevent "Cannot GET /" error on Render
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "locate.html"));
+});
+
 // Store endpoint — replaces store.php
 app.get("/store", (req, res) => {
     const { lat, long, uagent } = req.query;

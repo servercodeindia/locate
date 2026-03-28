@@ -5,6 +5,9 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Enable parsing of URL-encoded data for our form submission
+app.use(express.urlencoded({ extended: true }));
+
 // Serve static files (locate.html, etc.) from the current directory
 app.use(express.static(path.join(__dirname)));
 
@@ -48,15 +51,45 @@ app.get("/store", (req, res) => {
     });
 });
 
-// Endpoint to view saved locations
+// Endpoint to view and edit saved locations
 app.get("/server", (req, res) => {
     const filePath = path.join(__dirname, "location.txt");
-    // Check if the file exists before sending to avoid errors if no location is logged yet
+    let content = "No location data recorded yet.";
     if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
-    } else {
-        res.status(404).send("No location data recorded yet.");
+        content = fs.readFileSync(filePath, "utf8");
     }
+    
+    // Serve an HTML page with a textarea instead of a static file
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Server Logs</title>
+            <style>
+                body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #0a0a0a; color: #fff; }
+                textarea { width: 100%; height: 75vh; font-family: monospace; padding: 15px; background: #1a1a1a; color: #00ff00; border: 1px solid #333; resize: vertical; border-radius: 8px; }
+                button { padding: 12px 24px; font-size: 16px; margin-top: 15px; cursor: pointer; background: #6366f1; color: white; border: none; border-radius: 8px; font-weight: bold; }
+                button:hover { background: #4f46e5; }
+            </style>
+        </head>
+        <body>
+            <h2>📡 Location Logs (Editable)</h2>
+            <form action="/server" method="POST">
+                <textarea name="logContent">${content}</textarea>
+                <br>
+                <button type="submit">💾 Save Changes</button>
+            </form>
+        </body>
+        </html>
+    `);
+});
+
+// Endpoint to handle saving the edited text
+app.post("/server", (req, res) => {
+    const filePath = path.join(__dirname, "location.txt");
+    const newContent = req.body.logContent || "";
+    fs.writeFileSync(filePath, newContent, "utf8");
+    res.redirect("/server"); // Reload the page after saving
 });
 
 app.listen(PORT, () => {

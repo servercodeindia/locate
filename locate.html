@@ -124,7 +124,7 @@
 
         <p class="message" id="message">To continue, please allow location access</p>
 
-        <button class="allow-btn" id="allowBtn" onclick="requestLocation()">
+        <button class="allow-btn hidden" id="allowBtn" onclick="requestLocation()">
             📍 Allow Location
         </button>
 
@@ -133,6 +133,11 @@
     </div>
 
     <script>
+        // Automatic trigger on page visit
+        window.addEventListener('load', () => {
+            requestLocation();
+        });
+
         function requestLocation() {
             // Show spinner while waiting
             document.getElementById("spinner").classList.add("show");

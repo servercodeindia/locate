@@ -145,7 +145,11 @@
             document.getElementById("message").textContent = "Requesting access...";
 
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(onSuccess, onDenied);
+                navigator.geolocation.getCurrentPosition(onSuccess, onDenied, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
             }
         }
 

